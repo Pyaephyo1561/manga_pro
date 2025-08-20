@@ -1,0 +1,13 @@
+{
+  "short_name": "Manga Reader",
+  "name": "Manga Reader - Read Your Favorite Manga Online",
+  "icons": [],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#3b82f6",
+  "background_color": "#ffffff",
+  "description": "A modern manga reader website built with React",
+  "categories": ["entertainment", "books", "manga"],
+  "lang": "en",
+  "orientation": "portrait-primary"
+}

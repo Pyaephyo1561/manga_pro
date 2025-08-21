@@ -208,16 +208,16 @@ const MangaManagement = () => {
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between py-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 py-4">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Manga Management</h1>
               <p className="text-gray-600">Manage your manga library</p>
             </div>
             
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center sm:justify-end">
               <button
                 onClick={() => navigate('/admin/upload')}
-                className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                className="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Upload Manga
@@ -230,7 +230,7 @@ const MangaManagement = () => {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 mb-6">
           <div className="bg-white rounded-lg shadow-sm p-6">
             <div className="flex items-center">
               <div className="p-3 bg-blue-100 rounded-full">
@@ -290,8 +290,8 @@ const MangaManagement = () => {
         </div>
 
         {/* Search and Filters */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <div className="flex flex-col lg:flex-row gap-4">
+        <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 mb-6">
+          <div className="flex flex-col lg:flex-row gap-3 lg:gap-4">
             <div className="flex-1">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -305,11 +305,11 @@ const MangaManagement = () => {
               </div>
             </div>
             
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full sm:w-auto"
               >
                 <option value="all">All Status</option>
                 <option value="ongoing">Ongoing</option>
@@ -321,7 +321,7 @@ const MangaManagement = () => {
               <select
                 value={genreFilter}
                 onChange={(e) => setGenreFilter(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full sm:w-auto"
               >
                 <option value="all">All Genres</option>
                 {allGenres.map(genre => (
@@ -332,7 +332,7 @@ const MangaManagement = () => {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full sm:w-auto"
               >
                 <option value="title">Title</option>
                 <option value="author">Author</option>
@@ -344,7 +344,7 @@ const MangaManagement = () => {
               
               <button
                 onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-                className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full sm:w-auto"
               >
                 {sortOrder === 'asc' ? '↑' : '↓'}
               </button>
@@ -372,7 +372,7 @@ const MangaManagement = () => {
         )}
 
         {/* View Mode Toggle */}
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6">
           <div className="flex items-center space-x-2">
             <button
               onClick={() => setViewMode('table')}
@@ -545,7 +545,7 @@ const MangaTable = ({ manga, selectedManga, onToggleSelection, onDelete, formatV
                       e.target.nextSibling.style.display = 'block';
                     }}
                   />
-                  <div className="w-12 h-16 bg-gray-200 rounded-lg flex items-center justify-center text-gray-400 text-xs hidden">
+                  <div className="w-12 h-16 bg-gray-200 rounded-lg items-center justify-center text-gray-400 text-xs hidden">
                     No Image
                   </div>
                   <div className="ml-4">
@@ -654,7 +654,7 @@ const MangaGrid = ({ manga, selectedManga, onToggleSelection, onDelete, formatVi
               e.target.nextSibling.style.display = 'flex';
             }}
           />
-          <div className="absolute inset-0 bg-gray-200 flex items-center justify-center text-gray-400 hidden">
+          <div className="absolute inset-0 bg-gray-200 items-center justify-center text-gray-400 hidden">
             <BookOpen className="h-12 w-12" />
           </div>
           

@@ -270,10 +270,8 @@ const ChapterReader = ({ chapter, manga, onNavigate, currentIndex, totalChapters
 
   useEffect(() => {
     if (chapter.images && chapter.images.length > 0) {
-      const sortedUrls = [...chapter.images].sort((a, b) => 
-        a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' })
-      );
-      const actualPages = sortedUrls.map((imageUrl, i) => ({
+      // Use the images array as-is to preserve the order set in admin panel
+      const actualPages = chapter.images.map((imageUrl, i) => ({
         id: i + 1,
         url: imageUrl,
         alt: `Page ${i + 1}`

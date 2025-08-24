@@ -2,7 +2,24 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDropzone } from 'react-dropzone';
 import { useForm } from 'react-hook-form';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import {
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { 
   Upload, 
   X, 
@@ -32,6 +49,58 @@ import {
 
 import { useParams, useNavigate } from 'react-router-dom';
 
+// Sortable Image Item Component
+const SortableImageItem = ({ file, index, onRemove }) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: `${file.name}-${index}` });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`relative group border rounded-lg overflow-hidden bg-white transition-all ${
+        isDragging ? 'shadow-lg scale-105 z-10' : ''
+      }`}
+    >
+      <div
+        {...attributes}
+        {...listeners}
+        className="absolute top-1 left-1 bg-black bg-opacity-50 text-white p-1 rounded cursor-grab active:cursor-grabbing z-10"
+      >
+        <GripVertical className="h-3 w-3" />
+      </div>
+      <img
+        src={URL.createObjectURL(file)}
+        alt={file.name}
+        className="w-full h-32 object-cover"
+        onLoad={(e) => URL.revokeObjectURL(e.currentTarget.src)}
+      />
+      <div className="absolute inset-x-0 bottom-0 bg-black bg-opacity-50 text-white text-xs px-2 py-1 truncate">
+        {file.name}
+      </div>
+      <button
+        type="button"
+        onClick={() => onRemove(index)}
+        className="absolute top-1 right-1 bg-red-600 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+        title="Remove"
+      >
+        Remove
+      </button>
+    </div>
+  );
+};
+
 const ChapterManagement = () => {
   const { mangaId } = useParams();
   const navigate = useNavigate();
@@ -52,6 +121,14 @@ const ChapterManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('chapterNumber');
   const [sortOrder, setSortOrder] = useState('asc');
+
+  // DnD sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   const {
     register,
@@ -125,16 +202,18 @@ const ChapterManagement = () => {
   }, [setValue]);
 
   // Handle drag and drop reordering of images
-  const handleDragEnd = useCallback((result) => {
-    if (!result.destination) return;
+  const handleDragEnd = useCallback((event) => {
+    const { active, over } = event;
     
-    const currentImages = Array.isArray(selectedImages) ? selectedImages : [];
-    const reorderedImages = Array.from(currentImages);
-    const [reorderedItem] = reorderedImages.splice(result.source.index, 1);
-    reorderedImages.splice(result.destination.index, 0, reorderedItem);
-    
-    setValue('images', reorderedImages, { shouldValidate: true, shouldDirty: true });
-    toast.success('Images reordered successfully');
+    if (active.id !== over.id) {
+      const currentImages = Array.isArray(selectedImages) ? selectedImages : [];
+      const oldIndex = currentImages.findIndex((_, index) => `${currentImages[index].name}-${index}` === active.id);
+      const newIndex = currentImages.findIndex((_, index) => `${currentImages[index].name}-${index}` === over.id);
+      
+      const reorderedImages = arrayMove(currentImages, oldIndex, newIndex);
+      setValue('images', reorderedImages, { shouldValidate: true, shouldDirty: true });
+      toast.success('Images reordered successfully');
+    }
   }, [selectedImages, setValue]);
 
   // Fallback: handle native input change as well (click selection)
@@ -503,56 +582,27 @@ const ChapterManagement = () => {
                         </button>
                       </div>
                       
-                      <DragDropContext onDragEnd={handleDragEnd}>
-                        <Droppable droppableId="images" direction="horizontal">
-                          {(provided) => (
-                            <div
-                              {...provided.droppableProps}
-                              ref={provided.innerRef}
-                              className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3"
-                            >
-                              {selectedImages.map((file, idx) => (
-                                <Draggable key={`${file.name}-${idx}`} draggableId={`${file.name}-${idx}`} index={idx}>
-                                  {(provided, snapshot) => (
-                                    <div
-                                      ref={provided.innerRef}
-                                      {...provided.draggableProps}
-                                      className={`relative group border rounded-lg overflow-hidden bg-white transition-all ${
-                                        snapshot.isDragging ? 'shadow-lg scale-105 z-10' : ''
-                                      }`}
-                                    >
-                                      <div
-                                        {...provided.dragHandleProps}
-                                        className="absolute top-1 left-1 bg-black bg-opacity-50 text-white p-1 rounded cursor-grab active:cursor-grabbing z-10"
-                                      >
-                                        <GripVertical className="h-3 w-3" />
-                                      </div>
-                                      <img
-                                        src={URL.createObjectURL(file)}
-                                        alt={file.name}
-                                        className="w-full h-32 object-cover"
-                                        onLoad={(e) => URL.revokeObjectURL(e.currentTarget.src)}
-                                      />
-                                      <div className="absolute inset-x-0 bottom-0 bg-black bg-opacity-50 text-white text-xs px-2 py-1 truncate">
-                                        {file.name}
-                                      </div>
-                                      <button
-                                        type="button"
-                                        onClick={() => removeImageAt(idx)}
-                                        className="absolute top-1 right-1 bg-red-600 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity"
-                                        title="Remove"
-                                      >
-                                        Remove
-                                      </button>
-                                    </div>
-                                  )}
-                                </Draggable>
-                              ))}
-                              {provided.placeholder}
-                            </div>
-                          )}
-                        </Droppable>
-                      </DragDropContext>
+                      <DndContext
+                        sensors={sensors}
+                        collisionDetection={closestCenter}
+                        onDragEnd={handleDragEnd}
+                      >
+                        <SortableContext
+                          items={selectedImages.map((file, idx) => `${file.name}-${idx}`)}
+                          strategy={verticalListSortingStrategy}
+                        >
+                          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                            {selectedImages.map((file, idx) => (
+                              <SortableImageItem
+                                key={`${file.name}-${idx}`}
+                                file={file}
+                                index={idx}
+                                onRemove={removeImageAt}
+                              />
+                            ))}
+                          </div>
+                        </SortableContext>
+                      </DndContext>
                     </div>
                   )}
                 </div>

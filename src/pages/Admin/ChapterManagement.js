@@ -69,7 +69,7 @@ const SortableImageItem = ({ file, index, onRemove }) => {
     <div
       ref={setNodeRef}
       style={style}
-      className={`relative group border rounded-lg overflow-hidden bg-white transition-all ${
+      className={`relative group border border-gray-200 dark:border-dark-600 rounded-lg overflow-hidden bg-white dark:bg-dark-700 transition-all ${
         isDragging ? 'shadow-lg scale-105 z-10' : ''
       }`}
     >
@@ -410,23 +410,23 @@ const ChapterManagement = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-dark-900">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
+      <div className="bg-white dark:bg-dark-800 shadow-sm border-b dark:border-dark-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between py-4">
             <div className="flex items-center space-x-4">
               <button
                 onClick={onBack}
-                className="flex items-center text-gray-600 hover:text-gray-900"
+                className="flex items-center text-gray-600 dark:text-dark-300 hover:text-gray-900 dark:hover:text-white"
               >
                 <ArrowLeft className="h-5 w-5 mr-2" />
                 Back to Manga Management
               </button>
-              <div className="h-6 w-px bg-gray-300"></div>
+              <div className="h-6 w-px bg-gray-300 dark:bg-dark-600"></div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Chapter Management</h1>
-                <p className="text-gray-600">{mangaTitle}</p>
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Chapter Management</h1>
+                <p className="text-gray-600 dark:text-dark-300">{mangaTitle}</p>
               </div>
             </div>
             
@@ -445,54 +445,54 @@ const ChapterManagement = () => {
       <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-          <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="bg-white dark:bg-dark-800 rounded-lg shadow-sm p-6">
             <div className="flex items-center">
-              <div className="p-3 bg-blue-100 rounded-full">
-                <FileText className="h-6 w-6 text-blue-600" />
+              <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-full">
+                <FileText className="h-6 w-6 text-blue-600 dark:text-blue-400" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Chapters</p>
-                <p className="text-2xl font-bold text-gray-900">{chapters.length}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-dark-300">Total Chapters</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{chapters.length}</p>
               </div>
             </div>
           </div>
           
-          <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="bg-white dark:bg-dark-800 rounded-lg shadow-sm p-6">
             <div className="flex items-center">
-              <div className="p-3 bg-green-100 rounded-full">
-                <Image className="h-6 w-6 text-green-600" />
+              <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-full">
+                <Image className="h-6 w-6 text-green-600 dark:text-green-400" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Pages</p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-sm font-medium text-gray-600 dark:text-dark-300">Total Pages</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
                   {chapters.reduce((sum, ch) => sum + (ch.pages || 0), 0)}
                 </p>
               </div>
             </div>
           </div>
           
-          <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="bg-white dark:bg-dark-800 rounded-lg shadow-sm p-6">
             <div className="flex items-center">
-              <div className="p-3 bg-purple-100 rounded-full">
-                <Eye className="h-6 w-6 text-purple-600" />
+              <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-full">
+                <Eye className="h-6 w-6 text-purple-600 dark:text-purple-400" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Views</p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-sm font-medium text-gray-600 dark:text-dark-300">Total Views</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
                   {chapters.reduce((sum, ch) => sum + (ch.views || 0), 0)}
                 </p>
               </div>
             </div>
           </div>
           
-          <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="bg-white dark:bg-dark-800 rounded-lg shadow-sm p-6">
             <div className="flex items-center">
-              <div className="p-3 bg-yellow-100 rounded-full">
-                <Calendar className="h-6 w-6 text-yellow-600" />
+              <div className="p-3 bg-yellow-100 dark:bg-yellow-900/30 rounded-full">
+                <Calendar className="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Latest Chapter</p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-sm font-medium text-gray-600 dark:text-dark-300">Latest Chapter</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
                   {chapters.length > 0 ? chapters[chapters.length - 1].chapterNumber : 'N/A'}
                 </p>
               </div>
@@ -501,17 +501,17 @@ const ChapterManagement = () => {
         </div>
 
         {/* Search and Filters */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+        <div className="bg-white dark:bg-dark-800 rounded-lg shadow-sm p-6 mb-6">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-dark-400" />
                 <input
                   type="text"
                   placeholder="Search chapters..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-dark-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-dark-400"
                 />
               </div>
             </div>
@@ -520,7 +520,7 @@ const ChapterManagement = () => {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-dark-700 text-gray-900 dark:text-white"
               >
                 <option value="chapterNumber">Chapter Number</option>
                 <option value="title">Title</option>
@@ -530,7 +530,7 @@ const ChapterManagement = () => {
               
               <button
                 onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-                className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-700 dark:text-dark-200"
               >
                 {sortOrder === 'asc' ? <SortAsc className="h-4 w-4" /> : <SortDesc className="h-4 w-4" />}
               </button>
@@ -545,15 +545,15 @@ const ChapterManagement = () => {
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="bg-white rounded-lg shadow-sm p-6 mb-6"
+              className="bg-white dark:bg-dark-800 rounded-lg shadow-sm p-6 mb-6"
             >
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-gray-900">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                   {editingChapter ? 'Edit Chapter' : 'Add New Chapter'}
                 </h2>
                 <button
                   onClick={handleCancelEdit}
-                  className="p-2 text-gray-400 hover:text-gray-600 rounded-lg"
+                  className="p-2 text-gray-400 dark:text-dark-400 hover:text-gray-600 dark:hover:text-white rounded-lg"
                 >
                   <X className="h-5 w-5" />
                 </button>
@@ -562,7 +562,7 @@ const ChapterManagement = () => {
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-200 mb-2">
                       Chapter Number *
                     </label>
                     <input
@@ -572,7 +572,7 @@ const ChapterManagement = () => {
                         required: 'Chapter number is required',
                         min: { value: 0, message: 'Chapter number must be positive' }
                       })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-dark-700 text-gray-900 dark:text-white"
                       placeholder="1.0"
                     />
                     {errors.chapterNumber && (
@@ -581,7 +581,7 @@ const ChapterManagement = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-200 mb-2">
                       Chapter Title *
                     </label>
                     <input
@@ -590,7 +590,7 @@ const ChapterManagement = () => {
                         required: 'Chapter title is required',
                         minLength: { value: 3, message: 'Title must be at least 3 characters' }
                       })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-dark-700 text-gray-900 dark:text-white"
                       placeholder="Chapter Title"
                     />
                     {errors.title && (
@@ -600,27 +600,27 @@ const ChapterManagement = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-dark-200 mb-2">
                     Chapter Images *
                   </label>
                   <div
                     {...getRootProps()}
                     className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
                       isDragActive
-                        ? 'border-blue-400 bg-blue-50'
-                        : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
+                        ? 'border-blue-400 bg-blue-50 dark:bg-blue-900/30'
+                        : 'border-gray-300 dark:border-dark-600 hover:border-gray-400 dark:hover:border-dark-500 hover:bg-gray-50 dark:hover:bg-dark-700'
                     }`}
                   >
                     <input {...getInputProps({ onChange: handleFileInputChange })} />
-                    <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                                         <p className="text-sm text-gray-600">
+                    <Upload className="h-8 w-8 text-gray-400 dark:text-dark-400 mx-auto mb-2" />
+                                         <p className="text-sm text-gray-600 dark:text-dark-300">
                        {isDragActive
                          ? 'Drop the images here...'
                          : editingChapter 
                            ? 'Drag & drop new images here, or click to add more'
                            : 'Drag & drop images here, or click to select'}
                      </p>
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-gray-500 dark:text-dark-400 mt-1">
                       Supports: JPEG, PNG, GIF, WebP
                     </p>
                   </div>
@@ -634,9 +634,9 @@ const ChapterManagement = () => {
                   {Array.isArray(selectedImages) && selectedImages.length > 0 && (
                     <div className="mt-4">
                       <div className="flex items-center justify-between mb-2">
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-gray-600 dark:text-dark-300">
                           {selectedImages.length} image{selectedImages.length > 1 ? 's' : ''} selected
-                          <span className="ml-2 text-xs text-gray-500">(Drag to reorder)</span>
+                          <span className="ml-2 text-xs text-gray-500 dark:text-dark-400">(Drag to reorder)</span>
                         </p>
                         <button
                           type="button"
@@ -676,7 +676,7 @@ const ChapterManagement = () => {
                   <button
                     type="button"
                     onClick={handleCancelEdit}
-                    className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+                    className="px-4 py-2 text-gray-700 dark:text-dark-200 bg-gray-100 dark:bg-dark-700 rounded-lg hover:bg-gray-200 dark:hover:bg-dark-600"
                   >
                     Cancel
                   </button>
@@ -704,18 +704,18 @@ const ChapterManagement = () => {
         </AnimatePresence>
 
         {/* Chapters List */}
-        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900">
+        <div className="bg-white dark:bg-dark-800 rounded-lg shadow-sm overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-200 dark:border-dark-700">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
               Chapters ({filteredAndSortedChapters.length})
             </h3>
           </div>
 
           {filteredAndSortedChapters.length === 0 ? (
             <div className="text-center py-12">
-              <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No chapters found</h3>
-              <p className="text-gray-600 mb-4">
+              <FileText className="h-12 w-12 text-gray-400 dark:text-dark-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No chapters found</h3>
+              <p className="text-gray-600 dark:text-dark-300 mb-4">
                 {searchTerm ? 'Try adjusting your search terms.' : 'Get started by adding your first chapter.'}
               </p>
               {!searchTerm && (
@@ -729,27 +729,27 @@ const ChapterManagement = () => {
               )}
             </div>
           ) : (
-            <div className="divide-y divide-gray-200">
+            <div className="divide-y divide-gray-200 dark:divide-dark-700">
               {filteredAndSortedChapters.map((chapter, index) => (
                 <div
                   key={chapter.id}
-                  className="p-6 hover:bg-gray-50 transition-colors"
+                  className="p-6 hover:bg-gray-50 dark:hover:bg-dark-700 transition-colors"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
                       <div className="flex-shrink-0">
-                        <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                          <span className="text-lg font-bold text-blue-600">
+                        <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+                          <span className="text-lg font-bold text-blue-600 dark:text-blue-400">
                             {chapter.chapterNumber}
                           </span>
                         </div>
                       </div>
                       
                       <div className="flex-1">
-                        <h4 className="text-lg font-medium text-gray-900">
+                        <h4 className="text-lg font-medium text-gray-900 dark:text-white">
                           Chapter {chapter.chapterNumber}: {chapter.title}
                         </h4>
-                        <div className="flex items-center space-x-6 text-sm text-gray-500 mt-1">
+                        <div className="flex items-center space-x-6 text-sm text-gray-500 dark:text-dark-300 mt-1">
                           <span className="flex items-center">
                             <Image className="h-4 w-4 mr-1" />
                             {chapter.pages || 0} pages
@@ -771,7 +771,7 @@ const ChapterManagement = () => {
                     <div className="flex items-center space-x-2">
                       <button
                         onClick={() => handleEditChapter(chapter)}
-                        className="p-2 text-gray-400 hover:text-blue-600 rounded-lg hover:bg-blue-50"
+                        className="p-2 text-gray-400 dark:text-dark-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/30"
                         title="Edit Chapter"
                       >
                         <Edit className="h-4 w-4" />
@@ -779,7 +779,7 @@ const ChapterManagement = () => {
                       
                       <button
                         onClick={() => handleDeleteChapter(chapter.id)}
-                        className="p-2 text-gray-400 hover:text-red-600 rounded-lg hover:bg-red-50"
+                        className="p-2 text-gray-400 dark:text-dark-400 hover:text-red-600 dark:hover:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30"
                         title="Delete Chapter"
                       >
                         <Trash2 className="h-4 w-4" />

@@ -81,14 +81,23 @@ const SortableImageItem = ({ file, index, onRemove }) => {
         <GripVertical className="h-3 w-3" />
       </div>
       <img
-        src={URL.createObjectURL(file)}
+        src={file.isExisting ? file.url : URL.createObjectURL(file)}
         alt={file.name}
         className="w-full h-32 object-cover"
-        onLoad={(e) => URL.revokeObjectURL(e.currentTarget.src)}
+        onLoad={(e) => {
+          if (!file.isExisting) {
+            URL.revokeObjectURL(e.currentTarget.src);
+          }
+        }}
       />
       <div className="absolute inset-x-0 bottom-0 bg-black bg-opacity-50 text-white text-xs px-2 py-1 truncate">
-        {file.name}
+        {file.isExisting ? `Existing Image ${index + 1}` : file.name}
       </div>
+      {file.isExisting && (
+        <div className="absolute top-1 right-8 bg-blue-600 text-white text-xs px-2 py-1 rounded">
+          Existing
+        </div>
+      )}
       <button
         type="button"
         onClick={() => onRemove(index)}
@@ -186,9 +195,13 @@ const ChapterManagement = () => {
       a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' })
     );
     
-    setValue('images', sortedFiles, { shouldValidate: true, shouldDirty: true });
-    toast.success(`${sortedFiles.length} image(s) selected in order`);
-  }, [setValue]);
+    // Get current images and add new ones
+    const currentImages = Array.isArray(selectedImages) ? selectedImages : [];
+    const updatedImages = [...currentImages, ...sortedFiles];
+    
+    setValue('images', updatedImages, { shouldValidate: true, shouldDirty: true });
+    toast.success(`${sortedFiles.length} new image(s) added`);
+  }, [setValue, selectedImages]);
 
   const removeImageAt = useCallback((indexToRemove) => {
     const current = Array.isArray(selectedImages) ? selectedImages : [];
@@ -223,9 +236,14 @@ const ChapterManagement = () => {
     const sortedFiles = files.sort((a, b) =>
       a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' })
     );
-    setValue('images', sortedFiles, { shouldValidate: true, shouldDirty: true });
-    toast.success(`${sortedFiles.length} image(s) selected in order`);
-  }, [setValue]);
+    
+    // Get current images and add new ones
+    const currentImages = Array.isArray(selectedImages) ? selectedImages : [];
+    const updatedImages = [...currentImages, ...sortedFiles];
+    
+    setValue('images', updatedImages, { shouldValidate: true, shouldDirty: true });
+    toast.success(`${sortedFiles.length} new image(s) added`);
+  }, [setValue, selectedImages]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -245,8 +263,36 @@ const ChapterManagement = () => {
     setUploadProgress(0);
 
     try {
-      // Upload images to Cloudinary
-      const imageUrls = await uploadToCloudinary(data.images);
+      let imageUrls = [];
+      
+      if (editingChapter) {
+        // Handle existing and new images for editing
+        const existingImages = data.images.filter(img => img.isExisting);
+        const newImages = data.images.filter(img => !img.isExisting);
+        
+        // Keep existing image URLs
+        const existingUrls = existingImages.map(img => img.url);
+        
+        // Upload only new images
+        let newUrls = [];
+        if (newImages.length > 0) {
+          newUrls = await uploadToCloudinary(newImages);
+        }
+        
+        // Combine existing and new URLs in the correct order
+        imageUrls = data.images.map(img => {
+          if (img.isExisting) {
+            return img.url;
+          } else {
+            // Find the corresponding new URL
+            const newImageIndex = newImages.findIndex(newImg => newImg.name === img.name);
+            return newUrls[newImageIndex];
+          }
+        });
+      } else {
+        // Upload all images for new chapter
+        imageUrls = await uploadToCloudinary(data.images);
+      }
       
       // Create chapter data
       const chapterData = {
@@ -255,8 +301,8 @@ const ChapterManagement = () => {
         chapterNumber: parseFloat(data.chapterNumber),
         pages: imageUrls.length,
         images: imageUrls,
-        uploadDate: new Date().toISOString(),
-        views: 0,
+        uploadDate: editingChapter ? editingChapter.uploadDate : new Date().toISOString(),
+        views: editingChapter ? editingChapter.views : 0,
         status: 'published'
       };
 
@@ -289,6 +335,23 @@ const ChapterManagement = () => {
     setEditingChapter(chapter);
     setValue('title', chapter.title);
     setValue('chapterNumber', chapter.chapterNumber);
+    
+    // Convert existing image URLs to File objects for editing
+    if (chapter.images && chapter.images.length > 0) {
+      const imageFiles = chapter.images.map((url, index) => {
+        // Create a File-like object from the URL
+        const fileName = `existing-image-${index + 1}.jpg`;
+        return {
+          name: fileName,
+          url: url,
+          isExisting: true,
+          size: 0,
+          type: 'image/jpeg'
+        };
+      });
+      setValue('images', imageFiles, { shouldValidate: true, shouldDirty: true });
+    }
+    
     setShowUploadForm(true);
   };
 
@@ -550,11 +613,13 @@ const ChapterManagement = () => {
                   >
                     <input {...getInputProps({ onChange: handleFileInputChange })} />
                     <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                    <p className="text-sm text-gray-600">
-                      {isDragActive
-                        ? 'Drop the images here...'
-                        : 'Drag & drop images here, or click to select'}
-                    </p>
+                                         <p className="text-sm text-gray-600">
+                       {isDragActive
+                         ? 'Drop the images here...'
+                         : editingChapter 
+                           ? 'Drag & drop new images here, or click to add more'
+                           : 'Drag & drop images here, or click to select'}
+                     </p>
                     <p className="text-xs text-gray-500 mt-1">
                       Supports: JPEG, PNG, GIF, WebP
                     </p>

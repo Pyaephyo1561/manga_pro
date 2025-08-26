@@ -44,7 +44,8 @@ import {
   getChaptersByMangaId, 
   updateChapter, 
   deleteChapter,
-  uploadToCloudinary 
+  uploadToCloudinary,
+  setChapterPaidMeta 
 } from '../../services/cloudinaryService';
 
 import { useParams, useNavigate } from 'react-router-dom';
@@ -152,6 +153,8 @@ const ChapterManagement = () => {
 
   const chapterNumber = watch('chapterNumber');
   const selectedImages = watch('images', []);
+  const paidToggle = watch('isPaid');
+  const paidPrice = watch('price');
 
   useEffect(() => {
     if (mangaId) {
@@ -303,7 +306,9 @@ const ChapterManagement = () => {
         images: imageUrls,
         uploadDate: editingChapter ? editingChapter.uploadDate : new Date().toISOString(),
         views: editingChapter ? editingChapter.views : 0,
-        status: 'published'
+        status: 'published',
+        isPaid: !!data.isPaid,
+        price: data.isPaid ? Number(data.price || 0) : 0
       };
 
       if (editingChapter) {
@@ -335,6 +340,8 @@ const ChapterManagement = () => {
     setEditingChapter(chapter);
     setValue('title', chapter.title);
     setValue('chapterNumber', chapter.chapterNumber);
+    setValue('isPaid', !!chapter.isPaid);
+    setValue('price', Number(chapter.price || 0));
     
     // Convert existing image URLs to File objects for editing
     if (chapter.images && chapter.images.length > 0) {
@@ -670,6 +677,30 @@ const ChapterManagement = () => {
                       </DndContext>
                     </div>
                   )}
+                </div>
+
+                {/* Paywall controls */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="inline-flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-dark-200">
+                      <input type="checkbox" {...register('isPaid')} />
+                      Paid chapter
+                    </label>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-200 mb-2">
+                      Price (coins)
+                    </label>
+                    <input
+                      type="number"
+                      step="1"
+                      min="0"
+                      disabled={!paidToggle}
+                      {...register('price')}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-dark-700 text-gray-900 dark:text-white disabled:opacity-50"
+                      placeholder="e.g. 5"
+                    />
+                  </div>
                 </div>
 
                 <div className="flex justify-end space-x-3">

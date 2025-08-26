@@ -90,19 +90,29 @@ const Home = () => {
     }
   ];
 
-  // Fetch manga data from Cloudinary
+  // Fetch manga data with simple retry to avoid first-load empty state on slow/cold Firestore
   const fetchMangaData = useCallback(async () => {
-    try {
-      setLoading(true);
-      const mangaData = await getAllManga();
-      setAllManga(mangaData);
-      // Manga data loaded successfully
-    } catch (error) {
-      console.error('Error fetching manga data:', error);
-      setAllManga([]);
-    } finally {
-      setLoading(false);
+    setLoading(true);
+    const maxAttempts = 3;
+    let lastError = null;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        const mangaData = await getAllManga();
+        setAllManga(Array.isArray(mangaData) ? mangaData : []);
+        lastError = null;
+        break;
+      } catch (error) {
+        lastError = error;
+        // Exponential backoff: 300ms, 600ms
+        const delayMs = attempt * 300;
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
+      }
     }
+    if (lastError) {
+      console.error('Error fetching manga data after retries:', lastError);
+      setAllManga([]);
+    }
+    setLoading(false);
   }, []);
 
   // Get popular manga from service or use first 10 as fallback

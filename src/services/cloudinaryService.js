@@ -295,3 +295,13 @@ export {
 } from '../utils/firebase';
 
 export { getRelatedMangaFromFirestore as getRelatedManga } from '../utils/firebase';
+
+// Coins and purchases - re-export helpers for UI
+export {
+  getUserCoinBalanceFromFirestore as getUserCoinBalance,
+  addCoinsToUserInFirestore as addCoinsToUser,
+  deductCoinsFromUserInFirestore as deductCoinsFromUser,
+  isChapterPurchasedByUserInFirestore as isChapterPurchasedByUser,
+  recordChapterPurchaseInFirestore as recordChapterPurchase,
+  setChapterPaidMetaInFirestore as setChapterPaidMeta
+} from '../utils/firebase';

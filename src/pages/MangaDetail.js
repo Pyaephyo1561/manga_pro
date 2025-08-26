@@ -10,7 +10,9 @@ import {
   ChevronLeft,
   Heart,
   Share2,
-  ArrowLeft
+  ArrowLeft,
+  Lock,
+  Coins
 } from 'lucide-react';
 import { getAllManga, getChaptersByMangaId, isMangaFavoritedByUser, addMangaToUserFavorites, removeMangaFromUserFavorites, getRelatedManga } from '../services/cloudinaryService';
 import { onAuthStateChange } from '../services/authService';
@@ -301,8 +303,14 @@ const MangaDetail = () => {
                       <span className="text-primary-600 font-bold text-sm sm:text-base">{chapter.chapterNumber}</span>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-gray-900 text-sm sm:text-base mb-1">
+                      <h3 className="font-semibold text-gray-900 text-sm sm:text-base mb-1 flex items-center gap-2">
                         Chapter {chapter.chapterNumber}: {chapter.title}
+                        {chapter.isPaid ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-yellow-100 text-yellow-800 text-xs font-medium">
+                            <Lock className="w-3.5 h-3.5" />
+                            <Coins className="w-3 h-3" /> {typeof chapter.price !== 'undefined' ? chapter.price : ''}
+                          </span>
+                        ) : null}
                       </h3>
                       <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-4 text-xs sm:text-sm text-gray-600">
                         <span className="flex items-center space-x-1">

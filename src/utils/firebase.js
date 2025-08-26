@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, addDoc, updateDoc, deleteDoc, getDocs, getDoc, doc, query, orderBy, limit, where, serverTimestamp, setDoc } from 'firebase/firestore';
+import { getFirestore, collection, addDoc, updateDoc, deleteDoc, getDocs, getDoc, doc, query, orderBy, limit, where, serverTimestamp, setDoc, increment } from 'firebase/firestore';
 
 // Firebase configuration (prefer env, fallback to current values)
 const firebaseConfig = {
@@ -307,6 +307,85 @@ export const getChapterByIdFromFirestore = async (id) => {
   } catch (error) {
     console.error('Error getting chapter from Firestore:', error);
     return null;
+  }
+};
+
+// ===============================
+// Coins and purchases
+// ===============================
+
+export const getUserCoinBalanceFromFirestore = async (userId) => {
+  try {
+    if (!userId) return 0;
+    const userRef = doc(db, 'users', userId);
+    const snap = await getDoc(userRef);
+    return snap.exists() ? (snap.data().coins || 0) : 0;
+  } catch (e) {
+    console.error('Error getting coin balance:', e);
+    return 0;
+  }
+};
+
+export const addCoinsToUserInFirestore = async (userId, amount) => {
+  try {
+    if (!userId || !amount) return false;
+    const userRef = doc(db, 'users', userId);
+    await setDoc(userRef, { coins: increment(amount) }, { merge: true });
+    return true;
+  } catch (e) {
+    console.error('Error adding coins:', e);
+    return false;
+  }
+};
+
+export const deductCoinsFromUserInFirestore = async (userId, amount) => {
+  try {
+    if (!userId || !amount) return false;
+    const userRef = doc(db, 'users', userId);
+    const snap = await getDoc(userRef);
+    const current = snap.exists() ? (snap.data().coins || 0) : 0;
+    if (current < amount) return false;
+    await setDoc(userRef, { coins: current - amount }, { merge: true });
+    return true;
+  } catch (e) {
+    console.error('Error deducting coins:', e);
+    return false;
+  }
+};
+
+export const isChapterPurchasedByUserInFirestore = async (userId, chapterId) => {
+  try {
+    if (!userId || !chapterId) return false;
+    const purchaseRef = doc(db, 'users', userId, 'purchases', chapterId);
+    const snap = await getDoc(purchaseRef);
+    return snap.exists();
+  } catch (e) {
+    console.error('Error checking purchase:', e);
+    return false;
+  }
+};
+
+export const recordChapterPurchaseInFirestore = async (userId, chapterId, cost) => {
+  try {
+    if (!userId || !chapterId) return false;
+    const purchaseRef = doc(db, 'users', userId, 'purchases', chapterId);
+    await setDoc(purchaseRef, { chapterId, cost: cost || 0, purchasedAt: serverTimestamp() }, { merge: true });
+    return true;
+  } catch (e) {
+    console.error('Error recording purchase:', e);
+    return false;
+  }
+};
+
+export const setChapterPaidMetaInFirestore = async (chapterId, isPaid, price) => {
+  try {
+    if (!chapterId) return false;
+    const chapterRef = doc(db, 'chapters', chapterId);
+    await setDoc(chapterRef, { isPaid: !!isPaid, price: isPaid ? (price || 1) : 0 }, { merge: true });
+    return true;
+  } catch (e) {
+    console.error('Error setting chapter paid meta:', e);
+    return false;
   }
 };
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   ArrowLeft, 
@@ -16,14 +16,16 @@ import {
   Trash2,
   Plus,
   List,
-  Grid
+  Grid,
+  Coins
 } from 'lucide-react';
-import { getMangaById, getChaptersByMangaId, recordReadingHistoryForUser } from '../services/cloudinaryService';
+import { getMangaById, getChaptersByMangaId, recordReadingHistoryForUser, getUserCoinBalance, isChapterPurchasedByUser, deductCoinsFromUser, recordChapterPurchase } from '../services/cloudinaryService';
 import { onAuthStateChange } from '../services/authService';
 
 const ChapterDetail = () => {
   const { mangaId, chapterId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [manga, setManga] = useState(null);
   const [chapters, setChapters] = useState([]);
   const [currentChapter, setCurrentChapter] = useState(null);
@@ -31,19 +33,30 @@ const ChapterDetail = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [viewMode, setViewMode] = useState('reader'); // 'reader', 'list', 'grid'
   const [isAdmin, setIsAdmin] = useState(false);
+  const [coins, setCoins] = useState(0);
+  const [paywall, setPaywall] = useState({ locked: false, price: 0 });
+  const [unlocking, setUnlocking] = useState(false);
+  const [authUser, setAuthUser] = useState(null);
+  const [paywallChecking, setPaywallChecking] = useState(true);
 
   useEffect(() => {
     checkAdminStatus();
     fetchMangaAndChapters();
   }, [mangaId, chapterId]);
 
-  // Listen for auth to record reading history
+  // Listen for auth to record reading history and track user
   useEffect(() => {
     const unsub = onAuthStateChange(async (u) => {
-      if (!u) return;
-      try {
-        await recordReadingHistoryForUser(u.uid, mangaId, chapterId, currentChapter?.chapterNumber);
-      } catch (e) {}
+      setAuthUser(u);
+      if (u) {
+        try {
+          await recordReadingHistoryForUser(u.uid, mangaId, chapterId, currentChapter?.chapterNumber);
+          // Re-evaluate paywall once logged in
+          if (currentChapter) {
+            await evaluatePaywall(currentChapter, u);
+          }
+        } catch (e) {}
+      }
     });
     return () => unsub && unsub();
   }, [mangaId, chapterId, currentChapter]);
@@ -84,6 +97,8 @@ const ChapterDetail = () => {
       if (chapterIndex !== -1) {
         setCurrentChapter(sortedChapters[chapterIndex]);
         setCurrentChapterIndex(chapterIndex);
+        setPaywallChecking(true);
+        await evaluatePaywall(sortedChapters[chapterIndex], authUser);
       } else if (sortedChapters.length > 0) {
         // If chapter not found, redirect to first chapter
         navigate(`/manga/${mangaId}/read/${sortedChapters[0].id}`);
@@ -92,6 +107,66 @@ const ChapterDetail = () => {
       console.error('Error fetching manga and chapters:', error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const evaluatePaywall = async (chapter, userOverride) => {
+    try {
+      const user = userOverride || authUser;
+      const isPaid = !!chapter.isPaid;
+      const price = Number(chapter.price || 0);
+      if (!isPaid || price <= 0) {
+        setPaywall({ locked: false, price: 0 });
+        setPaywallChecking(false);
+        return;
+      }
+      if (!user) {
+        setPaywall({ locked: true, price });
+        setPaywallChecking(false);
+        return;
+      }
+      const owned = await isChapterPurchasedByUser(user.uid, chapter.id);
+      if (owned) {
+        setPaywall({ locked: false, price: 0 });
+        setPaywallChecking(false);
+        return;
+      }
+      const balance = await getUserCoinBalance(user.uid);
+      setCoins(balance);
+      setPaywall({ locked: true, price });
+    } catch (e) {
+      setPaywall({ locked: false, price: 0 });
+    }
+    setPaywallChecking(false);
+  };
+
+  const handleUnlock = async () => {
+    try {
+      if (!authUser || !currentChapter) {
+        navigate('/auth', { state: { redirectTo: location.pathname } });
+        return;
+      }
+      setUnlocking(true);
+      // If already purchased (lifetime), don't charge again
+      const alreadyOwned = await isChapterPurchasedByUser(authUser.uid, currentChapter.id);
+      if (alreadyOwned) {
+        setPaywall({ locked: false, price: 0 });
+        setUnlocking(false);
+        return;
+      }
+      const ok = await deductCoinsFromUser(authUser.uid, paywall.price);
+      if (!ok) {
+        alert('Not enough coins.');
+        setUnlocking(false);
+        return;
+      }
+      await recordChapterPurchase(authUser.uid, currentChapter.id, paywall.price);
+      setPaywall({ locked: false, price: 0 });
+      setCoins((c) => Math.max(0, c - paywall.price));
+    } catch (e) {
+      // noop
+    } finally {
+      setUnlocking(false);
     }
   };
 
@@ -115,6 +190,26 @@ const ChapterDetail = () => {
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading chapter...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isLoading && paywall.locked && currentChapter && !paywallChecking) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4">
+        <div className="bg-white dark:bg-dark-800 rounded-xl shadow-lg p-6 w-full max-w-md text-center">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Unlock Chapter</h2>
+          <p className="text-gray-600 dark:text-dark-200 mb-4">
+            Chapter {currentChapter.chapterNumber} requires {paywall.price} coins to read.
+          </p>
+          <div className="text-sm text-gray-600 dark:text-dark-300 mb-4">Your balance: {coins} coins</div>
+          <div className="flex items-center justify-center space-x-3">
+            <button onClick={() => navigate(-1)} className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 bg-white dark:bg-dark-700 dark:text-dark-100">Back</button>
+            <button onClick={handleUnlock} disabled={unlocking} className="px-4 py-2 rounded-lg bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50">
+              {unlocking ? 'Unlocking...' : `Unlock for ${paywall.price}`}
+            </button>
+          </div>
         </div>
       </div>
     );

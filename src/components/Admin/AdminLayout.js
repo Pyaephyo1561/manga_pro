@@ -11,7 +11,8 @@ import {
   Upload,
   BarChart3,
   FileText,
-  TrendingUp
+  TrendingUp,
+  Coins
 } from 'lucide-react';
 
 const AdminLayout = () => {
@@ -46,6 +47,7 @@ const AdminLayout = () => {
     { name: 'Upload Manga', href: '/admin/upload', icon: Upload },
     { name: 'Chapters', href: '/admin/chapters', icon: FileText },
     { name: 'Popular Manga', href: '/admin/popular', icon: TrendingUp },
+    { name: 'Coin Management', href: '/admin/coins', icon: Coins },
     { name: 'Users', href: '/admin/users', icon: Users },
     { name: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
     { name: 'Settings', href: '/admin/settings', icon: Settings },

@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Search, BookOpen, Home, Library, Menu, X, Sun, Moon } from 'lucide-react';
+import { Search, BookOpen, Home, Library, Menu, X, Sun, Moon, Coins } from 'lucide-react';
+import { getUserCoinBalance } from '../services/cloudinaryService';
 import { onAuthStateChange, logout } from '../services/authService';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
   const [user, setUser] = useState(null);
+  const [coins, setCoins] = useState(0);
   const [isDark, setIsDark] = useState(() => {
     if (typeof window === 'undefined') return false;
     const saved = localStorage.getItem('theme');
@@ -26,6 +28,20 @@ const Navbar = () => {
     const unsub = onAuthStateChange(setUser);
     return () => unsub && unsub();
   }, []);
+
+  useEffect(() => {
+    const loadCoins = async () => {
+      try {
+        if (user) {
+          const balance = await getUserCoinBalance(user.uid);
+          setCoins(balance || 0);
+        } else {
+          setCoins(0);
+        }
+      } catch {}
+    };
+    loadCoins();
+  }, [user]);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -90,7 +106,13 @@ const Navbar = () => {
             {/* Auth area */}
             {user ? (
               <>
-                <span className="text-sm text-dark-700">Hi, {user.displayName || user.email}</span>
+                <div className="flex items-center gap-3">
+                  <span className="text-sm text-dark-700">Hi, {user.displayName || user.email}</span>
+                  <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-yellow-100 text-yellow-800 text-sm font-medium" title="Your coins">
+                    <Coins className="w-4 h-4" />
+                    <span>{coins}</span>
+                  </div>
+                </div>
                 <button onClick={handleLogout} className="px-3 py-2 text-sm rounded-lg bg-dark-900 text-white hover:bg-dark-800 transition-colors">
                   Logout
                 </button>

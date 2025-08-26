@@ -16,6 +16,7 @@ import MangaManagement from './pages/Admin/MangaManagement';
 import ChapterManagement from './pages/Admin/ChapterManagement';
 import AllChaptersManagement from './pages/Admin/AllChaptersManagement';
 import PopularMangaManagement from './pages/Admin/PopularMangaManagement';
+import CoinManagement from './pages/Admin/CoinManagement';
 import TestPage from './pages/Admin/TestPage';
 import CloudinaryTest from './components/CloudinaryTest';
 import FirebaseIndexHelper from './components/FirebaseIndexHelper';
@@ -55,6 +56,7 @@ function AppShell() {
             <Route path="chapters" element={<AllChaptersManagement />} />
             <Route path="manga/:mangaId/chapters" element={<ChapterManagement />} />
             <Route path="popular" element={<PopularMangaManagement />} />
+            <Route path="coins" element={<CoinManagement />} />
             <Route path="test" element={<TestPage />} />
             <Route path="cloudinary-test" element={<CloudinaryTest />} />
             <Route path="firebase-indexes" element={<FirebaseIndexHelper />} />

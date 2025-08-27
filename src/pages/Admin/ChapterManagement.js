@@ -51,7 +51,7 @@ import {
 import { useParams, useNavigate } from 'react-router-dom';
 
 // Sortable Image Item Component
-const SortableImageItem = ({ file, index, onRemove }) => {
+const SortableImageItem = ({ file, index, onRemove, onMoveUp, onMoveDown }) => {
   const {
     attributes,
     listeners,
@@ -77,14 +77,14 @@ const SortableImageItem = ({ file, index, onRemove }) => {
       <div
         {...attributes}
         {...listeners}
-        className="absolute top-1 left-1 bg-black bg-opacity-50 text-white p-1 rounded cursor-grab active:cursor-grabbing z-10"
+        className="absolute top-1 left-1 bg-black bg-opacity-50 text-white px-2 py-1 rounded cursor-grab active:cursor-grabbing z-10 touch-manipulation"
       >
-        <GripVertical className="h-3 w-3" />
+        <GripVertical className="h-4 w-4 md:h-3 md:w-3" />
       </div>
       <img
         src={file.isExisting ? file.url : URL.createObjectURL(file)}
         alt={file.name}
-        className="w-full h-32 object-cover"
+        className="w-full h-36 sm:h-32 object-cover select-none touch-pan-y"
         onLoad={(e) => {
           if (!file.isExisting) {
             URL.revokeObjectURL(e.currentTarget.src);
@@ -99,14 +99,32 @@ const SortableImageItem = ({ file, index, onRemove }) => {
           Existing
         </div>
       )}
-      <button
-        type="button"
-        onClick={() => onRemove(index)}
-        className="absolute top-1 right-1 bg-red-600 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity"
-        title="Remove"
-      >
-        Remove
-      </button>
+      <div className="absolute top-1 right-1 flex items-center gap-1">
+        <button
+          type="button"
+          onClick={() => onMoveUp(index)}
+          className="bg-gray-800/80 text-white text-xs px-2 py-1 rounded hover:bg-gray-900/90"
+          title="Move up"
+        >
+          ↑
+        </button>
+        <button
+          type="button"
+          onClick={() => onMoveDown(index)}
+          className="bg-gray-800/80 text-white text-xs px-2 py-1 rounded hover:bg-gray-900/90"
+          title="Move down"
+        >
+          ↓
+        </button>
+        <button
+          type="button"
+          onClick={() => onRemove(index)}
+          className="bg-red-600 text-white text-xs px-2.5 py-1.5 rounded"
+          title="Remove"
+        >
+          Remove
+        </button>
+      </div>
     </div>
   );
 };
@@ -132,9 +150,14 @@ const ChapterManagement = () => {
   const [sortBy, setSortBy] = useState('chapterNumber');
   const [sortOrder, setSortOrder] = useState('asc');
 
-  // DnD sensors
+  // DnD sensors (touch-friendly)
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        // Require a slight move to start dragging to avoid accidental scroll taps
+        distance: 6,
+      },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
@@ -663,13 +686,25 @@ const ChapterManagement = () => {
                           items={selectedImages.map((file, idx) => `${file.name}-${idx}`)}
                           strategy={verticalListSortingStrategy}
                         >
-                          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-3 gap-y-4">
                             {selectedImages.map((file, idx) => (
                               <SortableImageItem
                                 key={`${file.name}-${idx}`}
                                 file={file}
                                 index={idx}
                                 onRemove={removeImageAt}
+                                onMoveUp={(i) => {
+                                  const current = Array.isArray(selectedImages) ? selectedImages : [];
+                                  if (i <= 0) return;
+                                  const next = arrayMove(current, i, i - 1);
+                                  setValue('images', next, { shouldValidate: true, shouldDirty: true });
+                                }}
+                                onMoveDown={(i) => {
+                                  const current = Array.isArray(selectedImages) ? selectedImages : [];
+                                  if (i >= current.length - 1) return;
+                                  const next = arrayMove(current, i, i + 1);
+                                  setValue('images', next, { shouldValidate: true, shouldDirty: true });
+                                }}
                               />
                             ))}
                           </div>

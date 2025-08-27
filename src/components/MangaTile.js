@@ -62,7 +62,7 @@ const MangaTile = ({ manga }) => {
         </div>
       </Link>
       <Link to={`/manga/${id}`} className="block">
-        <h3 className="mt-2 text-sm sm:text-base font-semibold text-dark-900 line-clamp-2 group-hover:text-primary-600 transition-colors duration-200">
+        <h3 className="mt-2 text-sm sm:text-base font-semibold text-dark-900 line-clamp-1 group-hover:text-primary-600 transition-colors duration-200 min-h-[1.5rem] sm:min-h-[1.75rem]">
           {title}
         </h3>
       </Link>

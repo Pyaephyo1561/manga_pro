@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { TrendingUp, Clock, Star, ArrowRight, Loader, RefreshCw, Search, Filter, ChevronLeft, ChevronRight, BookOpen } from 'lucide-react';
@@ -9,6 +9,7 @@ import { getPopularManga } from '../services/popularMangaService';
 
 const Home = () => {
   const [allManga, setAllManga] = useState([]);
+  const resultsRef = useRef(null);
 
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -169,25 +170,34 @@ const Home = () => {
     setCurrentPage(1); // Reset to first page when filters are cleared
   }, []);
 
+  // Smoothly scroll results section into view
+  const scrollResultsTop = useCallback(() => {
+    if (resultsRef.current && typeof resultsRef.current.scrollIntoView === 'function') {
+      resultsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, []);
+
   // Pagination handlers
   const goToPage = useCallback((page) => {
     setCurrentPage(page);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, []);
+    scrollResultsTop();
+  }, [scrollResultsTop]);
 
   const goToNextPage = useCallback(() => {
     if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      scrollResultsTop();
     }
-  }, [currentPage, totalPages]);
+  }, [currentPage, totalPages, scrollResultsTop]);
 
   const goToPreviousPage = useCallback(() => {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      scrollResultsTop();
     }
-  }, [currentPage]);
+  }, [currentPage, scrollResultsTop]);
 
   // Reset to first page when search term changes
   useEffect(() => {
@@ -368,7 +378,7 @@ const Home = () => {
       </section>
 
       {/* Manga Results */}
-      <section className="py-12 md:py-16">
+      <section ref={resultsRef} className="py-12 md:py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 md:mb-8 space-y-4 md:space-y-0">
             <div className="flex items-center space-x-2">

@@ -16,6 +16,7 @@ import {
   Trash2,
   Plus,
   List,
+  Menu,
   Grid,
   Coins
 } from 'lucide-react';
@@ -38,6 +39,7 @@ const ChapterDetail = () => {
   const [unlocking, setUnlocking] = useState(false);
   const [authUser, setAuthUser] = useState(null);
   const [paywallChecking, setPaywallChecking] = useState(true);
+  const [showBottomMenu, setShowBottomMenu] = useState(false);
 
   useEffect(() => {
     checkAdminStatus();
@@ -322,13 +324,70 @@ const ChapterDetail = () => {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         {viewMode === 'reader' && (
-          <ChapterReader 
-            chapter={currentChapter} 
-            manga={manga}
-            onNavigate={navigateToChapter}
-            currentIndex={currentChapterIndex}
-            totalChapters={chapters.length}
-          />
+          <>
+            <ChapterReader 
+              chapter={currentChapter} 
+              manga={manga}
+              onNavigate={navigateToChapter}
+              currentIndex={currentChapterIndex}
+              totalChapters={chapters.length}
+            />
+
+            {/* Compact Bottom Controls: Prev | Chapters | Next (fixed with safe-area support) */}
+            <div
+              className="fixed bottom-0 left-0 right-0 z-30 px-4 sm:px-6 lg:px-8 pb-2"
+              style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 8px)', transform: 'translateZ(0)' }}
+            >
+              <div className="max-w-4xl mx-auto">
+                <div className="grid grid-cols-3 bg-white dark:bg-dark-800/95 backdrop-blur rounded-lg shadow-sm border border-gray-200/60 dark:border-dark-700/60">
+                  <button
+                    onClick={() => navigateToChapter('prev')}
+                    className="px-3 py-2 text-sm text-center rounded-l-lg text-gray-700 dark:text-dark-100 disabled:opacity-50"
+                    disabled={currentChapterIndex === 0}
+                  >
+                    Prev
+                  </button>
+                  <div className="relative">
+                    <button
+                      onClick={() => setShowBottomMenu((v) => !v)}
+                      className="w-full px-3 py-2 text-sm inline-flex items-center justify-center gap-2 text-gray-700 dark:text-dark-100"
+                      aria-label="Open chapter list"
+                    >
+                      <Menu className="h-4 w-4" />
+                      Chapters
+                    </button>
+                    {showBottomMenu && (
+                      <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-white dark:bg-dark-800 rounded-md shadow-lg border border-gray-200 dark:border-dark-700 max-h-56 w-64 overflow-auto z-40">
+                        {chapters.map((ch) => (
+                          <button
+                            key={ch.id}
+                            onClick={() => {
+                              setShowBottomMenu(false);
+                              handleChapterSelect(ch);
+                            }}
+                            className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-dark-700 ${
+                              ch.id === currentChapter.id ? 'bg-gray-100 dark:bg-dark-700 font-medium' : ''
+                            }`}
+                          >
+                            Ch. {ch.chapterNumber}: {ch.title}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => navigateToChapter('next')}
+                    className="px-3 py-2 text-sm text-center rounded-r-lg text-gray-700 dark:text-dark-100 disabled:opacity-50"
+                    disabled={currentChapterIndex === chapters.length - 1}
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            </div>
+            {/* Spacer to prevent content being covered by fixed bottom bar (safe-area aware) */}
+            <div style={{ height: 'calc(env(safe-area-inset-bottom, 0px) + 64px)' }} />
+          </>
         )}
 
         {viewMode === 'list' && (
